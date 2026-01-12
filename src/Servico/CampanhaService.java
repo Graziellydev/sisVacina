@@ -5,43 +5,34 @@ import Modelo.Campanha;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CampanhaService {
 
-    private List<Campanha> campanhas = new ArrayList<>();
+    private final List<Campanha> campanhas = new ArrayList<>();
 
     public CampanhaService() {
-        // Campanhas de exemplo
-        campanhas.add(new Campanha(
-                "COVID-19",
-                "Adultos",
-                LocalDate.now().plusDays(30)
-        ));
-        campanhas.add(new Campanha(
-                "Influenza",
-                "Idosos",
-                LocalDate.now().plusDays(15)
-        ));
+        // campanhas de exemplo
+        campanhas.add(new Campanha("Gripe 2026", "Influenza", "Idosos", LocalDate.now().plusMonths(2)));
+        campanhas.add(new Campanha("Covid-19", "Pfizer", "Adultos", LocalDate.now().plusMonths(1)));
     }
 
-    public void cadastrarCampanha(String nomeVacina, String publico, LocalDate dataFim) throws Exception {
-        if (nomeVacina.isEmpty() || publico.isEmpty() || dataFim == null) {
-            throw new Exception("Todos os campos devem ser preenchidos.");
-        }
+    public void adicionarCampanha(String nome, String vacina, String publico, LocalDate fim) {
+        campanhas.add(new Campanha(nome, vacina, publico, fim));
+    }
 
-        campanhas.add(new Campanha(nomeVacina, publico, dataFim));
+    public List<Campanha> listarCampanhas() {
+        return campanhas;
     }
 
     public List<Campanha> listarCampanhasAtivas() {
-        LocalDate hoje = LocalDate.now();
-        List<Campanha> ativas = new ArrayList<>();
+        return campanhas.stream()
+                .filter(c -> c.getDataFim().isAfter(LocalDate.now()))
+                .collect(Collectors.toList());
+    }
 
-        for (Campanha c : campanhas) {
-            if (!c.getDataFim().isBefore(hoje)) {
-                ativas.add(c);
-            }
-        }
-        return ativas;
+    public void atualizarNome(Campanha campanha, String novoNome) {
+        campanha.setNome(novoNome);
     }
 
     public void removerCampanha(Campanha campanha) {

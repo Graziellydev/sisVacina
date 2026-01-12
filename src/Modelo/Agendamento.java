@@ -4,28 +4,23 @@ import java.time.LocalDate;
 
 public class Agendamento {
 
-    private String cpfPessoa;
+    private String cpf;
     private String nomePessoa;
-    private String vacina;
+    private String campanha;
     private LocalDate data;
+    private String cpfResponsavel;
 
-    public Agendamento(String cpfPessoa, String nomePessoa, String vacina, LocalDate data) {
-        this.cpfPessoa = cpfPessoa;
+    public Agendamento(String cpf, String nomePessoa, String campanha, LocalDate data) {
+        this.cpf = cpf;
         this.nomePessoa = nomePessoa;
-        this.vacina = vacina;
+        this.campanha = campanha;
         this.data = data;
+        this.cpfResponsavel = cpf;
     }
 
-    public String getCpfPessoa() {
-        return cpfPessoa;
-    }
-
-    public String getNomePessoa() {
-        return nomePessoa;
-    }
-
-    @Override
-    public String toString() {
-        return nomePessoa + " - " + vacina + " - " + data;
-    }
+    public String getCpf() { return cpf; }
+    public String getNomePessoa() { return nomePessoa; }
+    public String getCampanha() { return campanha; }
+    public LocalDate getData() { return data; }
+    public String getCpfResponsavel() { return cpfResponsavel; }
 }

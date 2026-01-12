@@ -1,58 +1,62 @@
 package app.ui;
 
-import Modelo.Parente;
 import Servico.ParenteService;
+import app.ui.components.*;
 
 import javax.swing.*;
-import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
+import java.awt.*;
 import java.text.ParseException;
 
 public class TelaFiliarParente {
 
-    public TelaFiliarParente(String cpfResponsavel, ParenteService service) {
+    public TelaFiliarParente(String cpfResponsavel, ParenteService parenteService) {
 
         JFrame frame = new JFrame("Filiar Parente");
-        frame.setSize(420, 260);
-        frame.setLayout(null);
+        frame.setSize(450, 350);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout());
 
-        JLabel lblNome = new JLabel("Nome:");
-        lblNome.setBounds(30, 40, 100, 25);
+        frame.add(new TitleLabel("Filiar Parente"), BorderLayout.NORTH);
+
+        TexturedPanel centro = new TexturedPanel();
+        centro.setLayout(new GridLayout(4, 1, 10, 10));
+        centro.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
 
         JTextField txtNome = new JTextField();
-        txtNome.setBounds(150, 40, 220, 25);
+        JFormattedTextField txtCpf = criarCPF();
 
-        JLabel lblCpf = new JLabel("CPF:");
-        lblCpf.setBounds(30, 80, 100, 25);
+        RoundedButton btnSalvar = new RoundedButton("Salvar");
 
-        JFormattedTextField txtCpf = new JFormattedTextField();
-        try {
-            MaskFormatter mask = new MaskFormatter("###.###.###-##");
-            mask.setPlaceholderCharacter('_');
-            txtCpf.setFormatterFactory(new DefaultFormatterFactory(mask));
-        } catch (ParseException e) {
-        }
-        txtCpf.setBounds(150, 80, 220, 25);
+        centro.add(new JLabel("Nome do Parente:"));
+        centro.add(txtNome);
+        centro.add(new JLabel("CPF do Parente:"));
+        centro.add(txtCpf);
 
-        JButton btnSalvar = new JButton("Filiar");
-        btnSalvar.setBounds(130, 150, 150, 30);
+        frame.add(centro, BorderLayout.CENTER);
 
         btnSalvar.addActionListener(e -> {
-            service.filiar(new Parente(
+            parenteService.filiarParente(
                     cpfResponsavel,
                     txtCpf.getText(),
                     txtNome.getText()
-            ));
+            );
             JOptionPane.showMessageDialog(frame, "Parente filiado!");
             frame.dispose();
         });
 
-        frame.add(lblNome);
-        frame.add(txtNome);
-        frame.add(lblCpf);
-        frame.add(txtCpf);
-        frame.add(btnSalvar);
+        JPanel rodape = new JPanel();
+        rodape.add(btnSalvar);
+        frame.add(rodape, BorderLayout.SOUTH);
 
         frame.setVisible(true);
+    }
+
+    private JFormattedTextField criarCPF() {
+        try {
+            return new JFormattedTextField(new MaskFormatter("###.###.###-##"));
+        } catch (ParseException e) {
+            return new JFormattedTextField();
+        }
     }
 }

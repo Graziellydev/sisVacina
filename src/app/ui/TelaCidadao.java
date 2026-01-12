@@ -3,110 +3,65 @@ package app.ui;
 import Servico.AgendamentoService;
 import Servico.CampanhaService;
 import Servico.ParenteService;
+import app.ui.components.*;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class TelaCidadao {
 
-    private String cpfCidadao;
-    private String nomeCidadao;
-
-    private CampanhaService campanhaService;
-    private AgendamentoService agendamentoService;
-    private ParenteService parenteService;
-
-    public TelaCidadao(String cpfCidadao,
-                       String nomeCidadao,
+    public TelaCidadao(String cpf,
+                       String nome,
                        CampanhaService campanhaService,
                        AgendamentoService agendamentoService,
                        ParenteService parenteService) {
 
-        this.cpfCidadao = cpfCidadao;
-        this.nomeCidadao = nomeCidadao;
-        this.campanhaService = campanhaService;
-        this.agendamentoService = agendamentoService;
-        this.parenteService = parenteService;
-
         JFrame frame = new JFrame("Área do Cidadão");
-        frame.setSize(460, 380);
-        frame.setLayout(null);
+        frame.setSize(600, 460);
         frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        JLabel lblBemVindo = new JLabel("Bem-vindo, " + nomeCidadao);
-        lblBemVindo.setBounds(20, 20, 300, 25);
+        frame.add(new TitleLabel("Bem-vindo, " + nome), BorderLayout.NORTH);
 
-        JButton btnCampanhas = new JButton("Ver Campanhas");
-        btnCampanhas.setBounds(130, 60, 200, 30);
+        TexturedPanel centro = new TexturedPanel();
+        centro.setLayout(new GridLayout(5, 1, 15, 15));
+        centro.setBorder(BorderFactory.createEmptyBorder(30, 120, 30, 120));
 
-        JButton btnAgendar = new JButton("Agendar Vacina");
-        btnAgendar.setBounds(130, 100, 200, 30);
+        RoundedButton btnCampanhas = new RoundedButton("Ver Campanhas");
+        RoundedButton btnAgendar = new RoundedButton("Agendar Vacina");
+        RoundedButton btnMinhasVacinas = new RoundedButton("Minhas Vacinas");
+        RoundedButton btnParente = new RoundedButton("Filiar Parente");
+        RoundedButton btnSair = new RoundedButton("Sair");
 
-        JButton btnMinhasVacinas = new JButton("Minhas Vacinas");
-        btnMinhasVacinas.setBounds(130, 140, 200, 30);
+        centro.add(btnCampanhas);
+        centro.add(btnAgendar);
+        centro.add(btnMinhasVacinas);
+        centro.add(btnParente);
+        centro.add(btnSair);
 
-        JButton btnFiliarParente = new JButton("Filiar Parente");
-        btnFiliarParente.setBounds(130, 180, 200, 30);
-
-        JButton btnParentes = new JButton("Parentes Filiados");
-        btnParentes.setBounds(130, 220, 200, 30);
-
-        JButton btnSair = new JButton("Sair");
-        btnSair.setBounds(130, 270, 200, 30);
-
-        // Ações dos botões
+        frame.add(centro, BorderLayout.CENTER);
 
         btnCampanhas.addActionListener(e ->
                 new TelaCampanha(campanhaService)
         );
 
         btnAgendar.addActionListener(e ->
-                new TelaAgendamento(
-                        cpfCidadao,
-                        nomeCidadao,
-                        campanhaService,
-                        agendamentoService,
-                        parenteService
-                )
+                new TelaAgendamento(cpf, nome, campanhaService, agendamentoService, parenteService)
         );
 
         btnMinhasVacinas.addActionListener(e ->
-                new TelaVacinasAgendadas(
-                        cpfCidadao,
-                        agendamentoService,
-                        parenteService
-                )
+                new TelaVacinasAgendadas(cpf, agendamentoService, parenteService)
         );
 
-        btnFiliarParente.addActionListener(e ->
-                new TelaFiliarParente(
-                        cpfCidadao,
-                        parenteService
-                )
-        );
-
-        btnParentes.addActionListener(e ->
-                new TelaParente(
-                        cpfCidadao,
-                        parenteService
-                )
+        btnParente.addActionListener(e ->
+                new TelaFiliarParente(cpf, parenteService)
         );
 
         btnSair.addActionListener(e -> {
             frame.dispose();
-            new TelaInicial(
-                    campanhaService,
-                    agendamentoService,
-                    parenteService
-            );
+            new TelaInicial(campanhaService, agendamentoService, parenteService);
         });
-
-        frame.add(lblBemVindo);
-        frame.add(btnCampanhas);
-        frame.add(btnAgendar);
-        frame.add(btnMinhasVacinas);
-        frame.add(btnFiliarParente);
-        frame.add(btnParentes);
-        frame.add(btnSair);
 
         frame.setVisible(true);
     }

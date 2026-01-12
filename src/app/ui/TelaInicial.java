@@ -3,9 +3,11 @@ package app.ui;
 import Servico.AgendamentoService;
 import Servico.CampanhaService;
 import Servico.ParenteService;
+import app.ui.components.*;
+import app.ui.theme.UITheme;
 
 import javax.swing.*;
-import javax.swing.SwingConstants;
+import java.awt.*;
 
 public class TelaInicial {
 
@@ -14,45 +16,34 @@ public class TelaInicial {
                        ParenteService parenteService) {
 
         JFrame frame = new JFrame("Posto de Saúde");
-        frame.setSize(420, 260);
-        frame.setLayout(null);
+        frame.setSize(520, 380);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        JLabel titulo = new JLabel("Bem-vindo ao Sistema do Posto de Saúde", SwingConstants.CENTER);
-        titulo.setBounds(20, 20, 380, 30);
+        frame.add(new TitleLabel("Bem-vindo ao Sistema do Posto de Saúde"), BorderLayout.NORTH);
 
-        JLabel pergunta = new JLabel("Você é Funcionário ou Cidadão?", SwingConstants.CENTER);
-        pergunta.setBounds(20, 60, 380, 25);
+        TexturedPanel centro = new TexturedPanel();
+        centro.setLayout(new GridLayout(2, 1, 20, 20));
+        centro.setBorder(BorderFactory.createEmptyBorder(40, 120, 40, 120));
 
-        JButton btnFuncionario = new JButton("Funcionário");
-        btnFuncionario.setBounds(130, 110, 160, 30);
+        RoundedButton btnFuncionario = new RoundedButton("Sou Funcionário");
+        RoundedButton btnCidadao = new RoundedButton("Sou Cidadão");
 
-        JButton btnCidadao = new JButton("Cidadão");
-        btnCidadao.setBounds(130, 150, 160, 30);
+        centro.add(btnFuncionario);
+        centro.add(btnCidadao);
+
+        frame.add(centro, BorderLayout.CENTER);
 
         btnFuncionario.addActionListener(e -> {
             frame.dispose();
-            new TelaLogin(
-                    "FUNCIONARIO",
-                    campanhaService,
-                    agendamentoService,
-                    parenteService
-            );
+            new TelaLogin("FUNCIONARIO", campanhaService, agendamentoService, parenteService);
         });
 
         btnCidadao.addActionListener(e -> {
             frame.dispose();
-            new TelaLogin(
-                    "CIDADAO",
-                    campanhaService,
-                    agendamentoService,
-                    parenteService
-            );
+            new TelaLogin("CIDADAO", campanhaService, agendamentoService, parenteService);
         });
-
-        frame.add(titulo);
-        frame.add(pergunta);
-        frame.add(btnFuncionario);
-        frame.add(btnCidadao);
 
         frame.setVisible(true);
     }

@@ -1,74 +1,62 @@
 package app.ui;
 
-import Modelo.Campanha;
 import Servico.AgendamentoService;
 import Servico.CampanhaService;
 import Servico.ParenteService;
+import app.ui.components.*;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class TelaFuncionario {
 
-    private DefaultListModel<Campanha> model;
-    private CampanhaService campanhaService;
+    private JFrame frame;
 
     public TelaFuncionario(CampanhaService campanhaService,
                            AgendamentoService agendamentoService,
                            ParenteService parenteService) {
 
-        this.campanhaService = campanhaService;
+        frame = new JFrame("Área do Funcionário");
+        frame.setSize(600, 420);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        JFrame frame = new JFrame("Área do Funcionário");
-        frame.setSize(540, 360);
+        frame.add(new TitleLabel("Área do Funcionário"), BorderLayout.NORTH);
 
-        model = new DefaultListModel<>();
-        JList<Campanha> lista = new JList<>(model);
+        TexturedPanel centro = new TexturedPanel();
+        centro.setLayout(new GridLayout(4, 1, 15, 15));
+        centro.setBorder(BorderFactory.createEmptyBorder(30, 120, 30, 120));
 
-        atualizarLista();
+        RoundedButton btnAdicionar = new RoundedButton("Adicionar Campanha");
+        RoundedButton btnEditar = new RoundedButton("Editar Campanha");
+        RoundedButton btnExcluir = new RoundedButton("Excluir Campanha");
+        RoundedButton btnSair = new RoundedButton("Sair");
 
-        JButton btnAdicionar = new JButton("Adicionar");
-        JButton btnEditar = new JButton("Editar");
-        JButton btnExcluir = new JButton("Excluir");
-        JButton btnSair = new JButton("Sair");
+        centro.add(btnAdicionar);
+        centro.add(btnEditar);
+        centro.add(btnExcluir);
+        centro.add(btnSair);
 
-        btnAdicionar.addActionListener(e -> {
-            new TelaCadastroCampanha(campanhaService, this::atualizarLista);
-        });
+        frame.add(centro, BorderLayout.CENTER);
 
-        btnEditar.addActionListener(e -> {
-            Campanha c = lista.getSelectedValue();
-            if (c != null) {
-                new TelaCadastroCampanha(campanhaService, c, this::atualizarLista);
-            }
-        });
+        btnAdicionar.addActionListener(e ->
+                new TelaCadastroCampanha(campanhaService)
+        );
 
-        btnExcluir.addActionListener(e -> {
-            Campanha c = lista.getSelectedValue();
-            if (c != null) {
-                campanhaService.removerCampanha(c);
-                atualizarLista();
-            }
-        });
+        btnEditar.addActionListener(e ->
+                new TelaEditarCampanha(campanhaService)
+        );
+
+        btnExcluir.addActionListener(e ->
+                new TelaExcluirCampanha(campanhaService)
+        );
 
         btnSair.addActionListener(e -> {
             frame.dispose();
             new TelaInicial(campanhaService, agendamentoService, parenteService);
         });
 
-        JPanel botoes = new JPanel();
-        botoes.add(btnAdicionar);
-        botoes.add(btnEditar);
-        botoes.add(btnExcluir);
-        botoes.add(btnSair);
-
-        frame.add(new JScrollPane(lista), "Center");
-        frame.add(botoes, "South");
         frame.setVisible(true);
-    }
-
-    private void atualizarLista() {
-        model.clear();
-        campanhaService.listarCampanhasAtivas()
-                .forEach(model::addElement);
     }
 }

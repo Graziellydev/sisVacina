@@ -1,107 +1,101 @@
 package app.ui;
 
+import Modelo.Campanha;
 import Modelo.Parente;
 import Servico.AgendamentoService;
 import Servico.CampanhaService;
 import Servico.ParenteService;
+import app.ui.components.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.List;
 
 public class TelaAgendamento {
 
-    public TelaAgendamento(
-            String cpfCidadao,
-            String nomeCidadao,
-            CampanhaService campanhaService,
-            AgendamentoService agendamentoService,
-            ParenteService parenteService
-    ) {
+    private JFrame frame;
 
-        JFrame frame = new JFrame("Agendar Vacina");
-        frame.setSize(460, 360);
-        frame.setLayout(null);
+    public TelaAgendamento(String cpfCidadao,
+                           String nomeCidadao,
+                           CampanhaService campanhaService,
+                           AgendamentoService agendamentoService,
+                           ParenteService parenteService) {
 
-        JLabel lblPessoa = new JLabel("Agendar para:");
-        lblPessoa.setBounds(30, 30, 120, 25);
+        frame = new JFrame("Agendar Vacinação");
+        frame.setSize(650, 480);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        JComboBox<Object> comboPessoa = new JComboBox<>();
-        comboPessoa.setBounds(150, 30, 250, 25);
+        frame.add(new TitleLabel("Agendamento de Vacinação"), BorderLayout.NORTH);
 
-        // O próprio cidadão
-        comboPessoa.addItem(nomeCidadao + " (Você)");
+        TexturedPanel centro = new TexturedPanel();
+        centro.setLayout(new GridLayout(8, 1, 10, 10));
+        centro.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 100));
 
-        // Parentes filiados
-        for (Parente p : parenteService.listarPorResponsavel(cpfCidadao)) {
-            comboPessoa.addItem(p);
+        JComboBox<Campanha> cbCampanhas = new JComboBox<>();
+        campanhaService.listarCampanhasAtivas()
+                .forEach(cbCampanhas::addItem);
+
+        JComboBox<String> cbPessoa = new JComboBox<>();
+        cbPessoa.addItem(nomeCidadao + " (Você)");
+
+        List<Parente> parentes = parenteService.listarParentes(cpfCidadao);
+        for (Parente p : parentes) {
+            cbPessoa.addItem(p.getNome() + " (Parente)");
         }
 
-        JLabel lblVacina = new JLabel("Vacina:");
-        lblVacina.setBounds(30, 80, 120, 25);
+        JSpinner calendario = new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(calendario, "dd/MM/yyyy");
+        calendario.setEditor(editor);
 
-        JComboBox<String> comboVacina = new JComboBox<>();
-        campanhaService.listarCampanhasAtivas()
-                .forEach(c -> comboVacina.addItem(c.getNomeVacina()));
-        comboVacina.setBounds(150, 80, 250, 25);
+        RoundedButton btnAgendar = new RoundedButton("Confirmar Agendamento");
 
-        JLabel lblData = new JLabel("Data:");
-        lblData.setBounds(30, 130, 120, 25);
+        centro.add(new JLabel("Campanha:"));
+        centro.add(cbCampanhas);
+        centro.add(new JLabel("Quem irá se vacinar:"));
+        centro.add(cbPessoa);
+        centro.add(new JLabel("Data da vacinação:"));
+        centro.add(calendario);
+        centro.add(new JLabel());
+        centro.add(btnAgendar);
 
-        SpinnerDateModel model = new SpinnerDateModel();
-        JSpinner spinnerData = new JSpinner(model);
-        spinnerData.setEditor(
-                new JSpinner.DateEditor(spinnerData, "dd/MM/yyyy")
-        );
-        spinnerData.setBounds(150, 130, 250, 25);
-
-        JButton btnAgendar = new JButton("Agendar");
-        btnAgendar.setBounds(150, 200, 160, 30);
+        frame.add(centro, BorderLayout.CENTER);
 
         btnAgendar.addActionListener(e -> {
-            try {
-                Object selecionado = comboPessoa.getSelectedItem();
+            Campanha campanha = (Campanha) cbCampanhas.getSelectedItem();
+            String pessoaSelecionada = (String) cbPessoa.getSelectedItem();
 
-                String cpf;
-                String nome;
-
-                if (selecionado instanceof Parente) {
-                    Parente p = (Parente) selecionado;
-                    cpf = p.getCpfParente();
-                    nome = p.getNome() + " (Parente)";
-                } else {
-                    cpf = cpfCidadao;
-                    nome = nomeCidadao;
-                }
-
-                Date d = (Date) spinnerData.getValue();
-                LocalDate data = new java.sql.Date(d.getTime()).toLocalDate();
-
-                agendamentoService.agendar(
-                        cpf,
-                        nome,
-                        comboVacina.getSelectedItem().toString(),
-                        data
-                );
-
-                JOptionPane.showMessageDialog(frame,
-                        "Vacina agendada com sucesso!");
-
-                frame.dispose();
-
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame,
-                        "Erro ao agendar vacina.");
+            if (campanha == null) {
+                JOptionPane.showMessageDialog(frame, "Selecione uma campanha.");
+                return;
             }
-        });
 
-        frame.add(lblPessoa);
-        frame.add(comboPessoa);
-        frame.add(lblVacina);
-        frame.add(comboVacina);
-        frame.add(lblData);
-        frame.add(spinnerData);
-        frame.add(btnAgendar);
+            LocalDate data = LocalDate.now();
+
+            String cpfDestino = cpfCidadao;
+            String nomeDestino = nomeCidadao;
+
+            if (pessoaSelecionada.contains("(Parente)")) {
+                String nome = pessoaSelecionada.replace(" (Parente)", "");
+                Parente p = parenteService.buscarPorNome(cpfCidadao, nome);
+                cpfDestino = p.getCpf();
+                nomeDestino = p.getNome();
+            }
+
+            agendamentoService.agendar(
+                    cpfDestino,
+                    nomeDestino,
+                    campanha.getNome(),
+                    data
+            );
+
+            JOptionPane.showMessageDialog(frame,
+                    "Vacina agendada para " + nomeDestino);
+
+            frame.dispose();
+        });
 
         frame.setVisible(true);
     }

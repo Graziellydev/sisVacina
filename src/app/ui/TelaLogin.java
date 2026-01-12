@@ -3,104 +3,80 @@ package app.ui;
 import Servico.AgendamentoService;
 import Servico.CampanhaService;
 import Servico.ParenteService;
+import app.ui.components.*;
 
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
+import java.awt.*;
 import java.text.ParseException;
 
 public class TelaLogin {
 
-    private String tipoUsuario;
-
-    private CampanhaService campanhaService;
-    private AgendamentoService agendamentoService;
-    private ParenteService parenteService;
+    private JFrame frame;
 
     public TelaLogin(String tipoUsuario,
                      CampanhaService campanhaService,
                      AgendamentoService agendamentoService,
                      ParenteService parenteService) {
 
-        this.tipoUsuario = tipoUsuario;
-        this.campanhaService = campanhaService;
-        this.agendamentoService = agendamentoService;
-        this.parenteService = parenteService;
+        frame = new JFrame("Login");
+        frame.setSize(500, 380);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        JFrame frame = new JFrame("Login");
-        frame.setSize(420, 280);
-        frame.setLayout(null);
+        frame.add(new TitleLabel("Login - " + tipoUsuario), BorderLayout.NORTH);
 
-        JLabel lblTitulo = new JLabel("Login - " + tipoUsuario);
-        lblTitulo.setBounds(140, 20, 200, 25);
-
-        JLabel lblNome = new JLabel("Nome:");
-        lblNome.setBounds(40, 70, 100, 25);
+        TexturedPanel centro = new TexturedPanel();
+        centro.setLayout(new GridLayout(4, 1, 10, 10));
+        centro.setBorder(BorderFactory.createEmptyBorder(30, 100, 20, 100));
 
         JTextField txtNome = new JTextField();
-        txtNome.setBounds(140, 70, 200, 25);
+        JFormattedTextField txtCpf = criarCampoCPF();
 
-        JLabel lblCpf = new JLabel("CPF:");
-        lblCpf.setBounds(40, 110, 100, 25);
+        centro.add(new JLabel("Nome:"));
+        centro.add(txtNome);
+        centro.add(new JLabel("CPF:"));
+        centro.add(txtCpf);
 
-        JFormattedTextField txtCpf = criarCampoCpf();
-        txtCpf.setBounds(140, 110, 200, 25);
+        frame.add(centro, BorderLayout.CENTER);
 
-        JButton btnEntrar = new JButton("Entrar");
-        btnEntrar.setBounds(140, 160, 90, 30);
+        JPanel rodape = new JPanel(new FlowLayout());
+        RoundedButton btnEntrar = new RoundedButton("Entrar");
+        RoundedButton btnVoltar = new RoundedButton("Voltar");
 
-        JButton btnVoltar = new JButton("Voltar");
-        btnVoltar.setBounds(250, 160, 90, 30);
+        rodape.add(btnEntrar);
+        rodape.add(btnVoltar);
+
+        frame.add(rodape, BorderLayout.SOUTH);
 
         btnEntrar.addActionListener(e -> {
-            String nome = txtNome.getText().trim();
+            String nome = txtNome.getText();
             String cpf = txtCpf.getText();
 
-            if (nome.isEmpty() || cpf.contains("_")) {
-                JOptionPane.showMessageDialog(frame,
-                        "Preencha nome e CPF corretamente.");
+            if (nome.isEmpty() || cpf.contains(" ")) {
+                JOptionPane.showMessageDialog(frame, "Preencha todos os campos.");
                 return;
             }
 
             frame.dispose();
 
             if (tipoUsuario.equals("FUNCIONARIO")) {
-                new TelaFuncionario(
-                        campanhaService,
-                        agendamentoService,
-                        parenteService
-                );
+                new TelaFuncionario(campanhaService, agendamentoService, parenteService);
             } else {
-                new TelaCidadao(
-                        cpf,
-                        nome,
-                        campanhaService,
-                        agendamentoService,
-                        parenteService
-                );
+                new TelaCidadao(cpf, nome, campanhaService, agendamentoService, parenteService);
             }
         });
 
         btnVoltar.addActionListener(e -> {
             frame.dispose();
-            new TelaInicial(
-                    campanhaService,
-                    agendamentoService,
-                    parenteService
-            );
+            new TelaInicial(campanhaService, agendamentoService, parenteService);
         });
-
-        frame.add(lblTitulo);
-        frame.add(lblNome);
-        frame.add(txtNome);
-        frame.add(lblCpf);
-        frame.add(txtCpf);
-        frame.add(btnEntrar);
-        frame.add(btnVoltar);
 
         frame.setVisible(true);
     }
 
-    private JFormattedTextField criarCampoCpf() {
+    private JFormattedTextField criarCampoCPF() {
         try {
             MaskFormatter mask = new MaskFormatter("###.###.###-##");
             mask.setPlaceholderCharacter('_');
