@@ -1,0 +1,2 @@
+Gripe H1N1;Influenza;Geral;2026-07-14;1
+Covid-19;Pfizer;Geral;2026-05-14;2
